@@ -126,22 +126,57 @@
   }
   .section-sub{color:var(--ink-soft); font-size:.85rem; margin:0 0 20px;}
 
-  .principle-row{
-    display:grid;
-    grid-template-columns:34px 1fr;
-    gap:12px;
-    padding:14px 0;
+  .principle-item{
     border-bottom:1px dashed var(--paper-line);
   }
-  .principle-row:last-child{border-bottom:none;}
-  .principle-num{
+  .principle-item:last-child{border-bottom:none;}
+  .principle-btn{
+    width:100%;
+    display:flex;
+    align-items:center;
+    gap:16px;
+    background:none;
+    border:none;
+    padding:18px 6px;
+    cursor:pointer;
+    font-family:'Lora',serif;
+    text-align:left;
+    color:var(--ink);
+  }
+  .principle-btn:hover{background:#fbf8ee;}
+  .principle-btn:focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+  .principle-btn .principle-num{
     font-family:'IBM Plex Mono',monospace;
     color:var(--margin-red);
     font-size:.85rem;
-    padding-top:2px;
+    flex-shrink:0;
   }
-  .principle-row strong{display:block; margin-bottom:3px;}
-  .principle-row p{margin:0; color:var(--ink); font-size:.95rem;}
+  .principle-btn .principle-term{
+    flex:1;
+    font-family:'Special Elite',monospace;
+    text-transform:uppercase;
+    letter-spacing:.03em;
+    font-size:1.02rem;
+  }
+  .principle-btn .chevron{
+    font-size:1.3rem;
+    line-height:1;
+    color:var(--gold);
+    transition:transform .2s ease;
+    flex-shrink:0;
+  }
+  .principle-btn[aria-expanded="true"] .chevron{transform:rotate(45deg);}
+  @media (prefers-reduced-motion: reduce){
+    .principle-btn .chevron{transition:none;}
+  }
+  .principle-desc{
+    margin:0 6px 18px 50px;
+    padding:12px 14px;
+    background:#eaf6ec;
+    border:2px solid var(--credit-green);
+    border-radius:4px;
+  }
+  .principle-desc p{margin:0; color:var(--ink); font-size:.95rem;}
 
   .equation-box{
     margin:32px 0 24px;
@@ -161,20 +196,39 @@
     gap:14px;
     margin-top:24px;
   }
-  .term-card{
+  .term-item{
     background:#fff;
     border:1px solid var(--paper-line);
-    padding:14px;
   }
-  .term-card h3{
+  .term-btn{
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    background:none;
+    border:none;
+    padding:12px 14px;
+    cursor:pointer;
     font-family:'IBM Plex Mono',monospace;
     font-size:.8rem;
     text-transform:uppercase;
     letter-spacing:.05em;
     color:var(--margin-red);
-    margin:0 0 6px;
+    text-align:left;
   }
-  .term-card p{margin:0; font-size:.87rem;}
+  .term-btn:hover{background:#fbf8ee;}
+  .term-btn:focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+  .term-btn .chevron{font-size:1.15rem; line-height:1; color:var(--gold); transition:transform .2s ease; flex-shrink:0;}
+  .term-btn[aria-expanded="true"] .chevron{transform:rotate(45deg);}
+  .term-desc{
+    margin:0 14px 14px;
+    padding:12px 14px;
+    background:#eaf6ec;
+    border:2px solid var(--credit-green);
+    border-radius:4px;
+  }
+  .term-desc p{margin:0; font-size:.87rem; color:var(--ink);}
 
   .score-bar{
     display:flex;
@@ -271,11 +325,28 @@
     html{scroll-behavior:auto;}
   }
 
-  .justif, .answer{
+  .justif{
     margin-top:10px;
     padding:10px 12px;
     background:#fbf8ee;
     border-left:3px solid var(--gold);
+    font-size:.88rem;
+    color:var(--ink);
+  }
+  .justif.correct-fb{
+    background:#eaf6ec;
+    border-left:3px solid var(--credit-green);
+  }
+  .justif.incorrect-fb{
+    background:#faeeee;
+    border-left:3px solid var(--debit-red);
+  }
+  .answer{
+    margin-top:10px;
+    padding:12px 14px;
+    background:#eaf6ec;
+    border:2px solid var(--credit-green);
+    border-radius:4px;
     font-size:.88rem;
     color:var(--ink);
   }
@@ -343,38 +414,125 @@
       <h2 class="section-title">Principios Contables Fundamentales</h2>
       <p class="section-sub">Ocho principios que ordenan cómo y cuándo se registra la información contable.</p>
 
-      <div class="principle-row"><span class="principle-num">01</span><div><strong>Entidad</strong><p>La contabilidad se lleva para la empresa como un ente separado de sus dueños; no deben mezclarse los recursos u obligaciones personales de los socios con los de la empresa.</p></div></div>
+      <div class="principle-item">
+        <button class="principle-btn" aria-expanded="false" aria-controls="p-desc-01">
+          <span class="principle-num">01</span>
+          <span class="principle-term">ENTIDAD</span>
+          <span class="chevron">+</span>
+        </button>
+        <div class="principle-desc" id="p-desc-01" hidden>
+          <p>La contabilidad se lleva para la empresa como un ente separado de sus dueños; no deben mezclarse los recursos u obligaciones personales de los socios con los de la empresa.</p>
+        </div>
+      </div>
 
-      <div class="principle-row"><span class="principle-num">02</span><div><strong>Valuación al costo (costo histórico)</strong><p>Los activos se registran al valor pagado en el momento de su adquisición, y no se ajustan posteriormente por cambios en su valor de mercado.</p></div></div>
+      <div class="principle-item">
+        <button class="principle-btn" aria-expanded="false" aria-controls="p-desc-02">
+          <span class="principle-num">02</span>
+          <span class="principle-term">VALUACIÓN AL COSTO (COSTO HISTÓRICO)</span>
+          <span class="chevron">+</span>
+        </button>
+        <div class="principle-desc" id="p-desc-02" hidden>
+          <p>Los activos se registran al valor pagado en el momento de su adquisición, y no se ajustan posteriormente por cambios en su valor de mercado.</p>
+        </div>
+      </div>
 
-      <div class="principle-row"><span class="principle-num">03</span><div><strong>Partida doble</strong><p>Toda transacción afecta al menos dos cuentas contables, de modo que la ecuación Activos = Pasivos + Patrimonio se mantenga siempre equilibrada.</p></div></div>
+      <div class="principle-item">
+        <button class="principle-btn" aria-expanded="false" aria-controls="p-desc-03">
+          <span class="principle-num">03</span>
+          <span class="principle-term">PARTIDA DOBLE</span>
+          <span class="chevron">+</span>
+        </button>
+        <div class="principle-desc" id="p-desc-03" hidden>
+          <p>Toda transacción afecta al menos dos cuentas contables, de modo que la ecuación Activos = Pasivos + Patrimonio se mantenga siempre equilibrada.</p>
+        </div>
+      </div>
 
-      <div class="principle-row"><span class="principle-num">04</span><div><strong>Devengado (o acumulación)</strong><p>Los ingresos y gastos se reconocen en el período en que ocurren económicamente, independientemente de si existe un flujo de caja asociado en ese mismo momento.</p></div></div>
+      <div class="principle-item">
+        <button class="principle-btn" aria-expanded="false" aria-controls="p-desc-04">
+          <span class="principle-num">04</span>
+          <span class="principle-term">DEVENGADO (O ACUMULACIÓN)</span>
+          <span class="chevron">+</span>
+        </button>
+        <div class="principle-desc" id="p-desc-04" hidden>
+          <p>Los ingresos y gastos se reconocen en el período en que ocurren económicamente, independientemente de si existe un flujo de caja asociado en ese mismo momento.</p>
+        </div>
+      </div>
 
-      <div class="principle-row"><span class="principle-num">05</span><div><strong>Realización</strong><p>La utilidad de una venta se reconoce cuando el bien se entrega o el servicio se presta al cliente, y no antes (por ejemplo, no al recibir un anticipo).</p></div></div>
+      <div class="principle-item">
+        <button class="principle-btn" aria-expanded="false" aria-controls="p-desc-05">
+          <span class="principle-num">05</span>
+          <span class="principle-term">REALIZACIÓN</span>
+          <span class="chevron">+</span>
+        </button>
+        <div class="principle-desc" id="p-desc-05" hidden>
+          <p>La utilidad de una venta se reconoce cuando el bien se entrega o el servicio se presta al cliente, y no antes (por ejemplo, no al recibir un anticipo).</p>
+        </div>
+      </div>
 
-      <div class="principle-row"><span class="principle-num">06</span><div><strong>Prudencia o criterio conservador</strong><p>Frente a dos valores posibles para una partida, se prefiere aquel que no sobreestime activos ni utilidades.</p></div></div>
+      <div class="principle-item">
+        <button class="principle-btn" aria-expanded="false" aria-controls="p-desc-06">
+          <span class="principle-num">06</span>
+          <span class="principle-term">PRUDENCIA O CRITERIO CONSERVADOR</span>
+          <span class="chevron">+</span>
+        </button>
+        <div class="principle-desc" id="p-desc-06" hidden>
+          <p>Frente a dos valores posibles para una partida, se prefiere aquel que no sobreestime activos ni utilidades.</p>
+        </div>
+      </div>
 
-      <div class="principle-row"><span class="principle-num">07</span><div><strong>Materialidad</strong><p>Los principios contables se aplican cuando las cifras involucradas son significativas; los montos poco relevantes admiten mayor flexibilidad.</p></div></div>
+      <div class="principle-item">
+        <button class="principle-btn" aria-expanded="false" aria-controls="p-desc-07">
+          <span class="principle-num">07</span>
+          <span class="principle-term">MATERIALIDAD</span>
+          <span class="chevron">+</span>
+        </button>
+        <div class="principle-desc" id="p-desc-07" hidden>
+          <p>Los principios contables se aplican cuando las cifras involucradas son significativas; los montos poco relevantes admiten mayor flexibilidad.</p>
+        </div>
+      </div>
 
-      <div class="principle-row"><span class="principle-num">08</span><div><strong>Consistencia</strong><p>Una vez adoptado un criterio contable, la empresa debe mantenerlo en el tiempo, salvo justificación de cambio.</p></div></div>
+      <div class="principle-item">
+        <button class="principle-btn" aria-expanded="false" aria-controls="p-desc-08">
+          <span class="principle-num">08</span>
+          <span class="principle-term">CONSISTENCIA</span>
+          <span class="chevron">+</span>
+        </button>
+        <div class="principle-desc" id="p-desc-08" hidden>
+          <p>Una vez adoptado un criterio contable, la empresa debe mantenerlo en el tiempo, salvo justificación de cambio.</p>
+        </div>
+      </div>
 
       <div class="equation-box">
         <div class="eq">Activos&nbsp; = &nbsp;Pasivos&nbsp; + &nbsp;Patrimonio</div>
       </div>
 
       <div class="terms-grid">
-        <div class="term-card">
-          <h3>Activos</h3>
-          <p>Recursos controlados por la empresa, originados en transacciones pasadas, con potencial de generar beneficios económicos futuros.</p>
+        <div class="term-item">
+          <button class="term-btn" aria-expanded="false" aria-controls="t-desc-activos">
+            <span>Activos</span>
+            <span class="chevron">+</span>
+          </button>
+          <div class="term-desc" id="t-desc-activos" hidden>
+            <p>Recursos controlados por la empresa, originados en transacciones pasadas, con potencial de generar beneficios económicos futuros.</p>
+          </div>
         </div>
-        <div class="term-card">
-          <h3>Pasivos</h3>
-          <p>Obligaciones actuales de la empresa con terceros, que implicarán una salida futura de recursos.</p>
+        <div class="term-item">
+          <button class="term-btn" aria-expanded="false" aria-controls="t-desc-pasivos">
+            <span>Pasivos</span>
+            <span class="chevron">+</span>
+          </button>
+          <div class="term-desc" id="t-desc-pasivos" hidden>
+            <p>Obligaciones actuales de la empresa con terceros, que implicarán una salida futura de recursos.</p>
+          </div>
         </div>
-        <div class="term-card">
-          <h3>Patrimonio</h3>
-          <p>Derecho residual de los dueños sobre los activos de la empresa, una vez descontados los pasivos.</p>
+        <div class="term-item">
+          <button class="term-btn" aria-expanded="false" aria-controls="t-desc-patrimonio">
+            <span>Patrimonio</span>
+            <span class="chevron">+</span>
+          </button>
+          <div class="term-desc" id="t-desc-patrimonio" hidden>
+            <p>Derecho residual de los dueños sobre los activos de la empresa, una vez descontados los pasivos.</p>
+          </div>
         </div>
       </div>
     </section>
@@ -422,13 +580,13 @@
           <li>La intención de una empresa de renovar su flota de vehículos el próximo año.</li>
           <li>La obligación de devolver un anticipo recibido de un cliente si no se le entrega el producto contratado.</li>
         </ol>
-        <div class="mc" data-correct="1">
+        <div class="mc" data-correct="4">
           <div class="options">
-            <button class="opt">a) Solo I</button>
-            <button class="opt">b) Solo I y III</button>
-            <button class="opt">c) Solo III</button>
+            <button class="opt">a) Solo III</button>
+            <button class="opt">b) Todas</button>
+            <button class="opt">c) Solo I</button>
             <button class="opt">d) Solo II y III</button>
-            <button class="opt">e) Todas</button>
+            <button class="opt">e) Solo I y III</button>
           </div>
           <p class="justif" hidden>I y III son obligaciones actuales de la empresa con terceros (pasivo). II es solo una intención futura, no una obligación presente, por lo que no se reconoce como pasivo.</p>
         </div>
@@ -442,12 +600,12 @@
           <li>Al momento de pagar, disminuye "Caja" y se reconoce de inmediato un "Gasto por Seguros" de $3.600.</li>
           <li>Durante el año 2027 se reconocerá un gasto por $600.</li>
         </ol>
-        <div class="mc" data-correct="1">
+        <div class="mc" data-correct="0">
           <div class="options">
-            <button class="opt">a) Sólo I</button>
-            <button class="opt">b) Sólo III</button>
-            <button class="opt">c) I y III</button>
-            <button class="opt">d) Todas</button>
+            <button class="opt">a) Sólo III</button>
+            <button class="opt">b) Todas</button>
+            <button class="opt">c) Sólo I</button>
+            <button class="opt">d) I y III</button>
           </div>
           <p class="justif" hidden>Al pagar, lo correcto es reconocer un activo "Seguro pagado por anticipado" (no "Bodega" ni un gasto inmediato). La cobertura son 12 meses a $300 mensuales; entre el 1 de enero y el 1 de marzo de 2027 corresponden 2 meses, es decir $600 de gasto en 2027.</p>
         </div>
@@ -461,12 +619,12 @@
           <li>Las Utilidades Retenidas podrían disminuir si la empresa repartió dividendos superiores a la utilidad del período.</li>
           <li>La empresa necesariamente cuenta con más efectivo disponible que al inicio del período.</li>
         </ol>
-        <div class="mc" data-correct="1">
+        <div class="mc" data-correct="2">
           <div class="options">
-            <button class="opt">a) Sólo I</button>
-            <button class="opt">b) Sólo II</button>
-            <button class="opt">c) I y II</button>
-            <button class="opt">d) Ninguna</button>
+            <button class="opt">a) Ninguna</button>
+            <button class="opt">b) Sólo I</button>
+            <button class="opt">c) Sólo II</button>
+            <button class="opt">d) I y II</button>
           </div>
           <p class="justif" hidden>El Patrimonio puede moverse por otras partidas además de la utilidad (aportes, retiros), por lo que I no es necesariamente cierto. III es falso por el principio de devengado: utilidad no equivale a caja. II es correcto: si se reparten dividendos superiores a la utilidad del período, las utilidades retenidas acumuladas disminuyen.</p>
         </div>
@@ -475,12 +633,12 @@
       <div class="exercise-block">
         <p class="exercise-label">P4</p>
         <p class="statement">La empresa "ConstruMax" compra maquinaria por $8.000.000, pagando 40% al contado y firmando un pagaré por el resto a 90 días. ¿Cuál es el efecto neto en la ecuación contable al momento de la compra?</p>
-        <div class="mc" data-correct="1">
+        <div class="mc" data-correct="3">
           <div class="options">
             <button class="opt">a) Aumenta un Activo por $8.000.000 y aumenta el Patrimonio por $8.000.000.</button>
-            <button class="opt">b) Aumenta un Activo por $8.000.000, disminuye un Activo por $3.200.000 y aumenta un Pasivo por $4.800.000.</button>
-            <button class="opt">c) Aumenta un Activo por $4.800.000 y aumenta un Pasivo por $4.800.000.</button>
-            <button class="opt">d) Disminuye un Activo por $3.200.000 y aumenta un Patrimonio por $4.800.000.</button>
+            <button class="opt">b) Aumenta un Activo por $4.800.000 y aumenta un Pasivo por $4.800.000.</button>
+            <button class="opt">c) Disminuye un Activo por $3.200.000 y aumenta un Patrimonio por $4.800.000.</button>
+            <button class="opt">d) Aumenta un Activo por $8.000.000, disminuye un Activo por $3.200.000 y aumenta un Pasivo por $4.800.000.</button>
           </div>
           <p class="justif" hidden>Maquinaria (activo) aumenta $8.000.000; Caja (activo) disminuye $3.200.000 (el 40% pagado al contado); Pasivo (pagaré) aumenta $4.800.000 (el 60% restante).</p>
         </div>
@@ -489,12 +647,12 @@
       <div class="exercise-block">
         <p class="exercise-label">P5</p>
         <p class="statement">¿En qué situación se está aplicando correctamente el principio de Devengado?</p>
-        <div class="mc" data-correct="0">
+        <div class="mc" data-correct="1">
           <div class="options">
-            <button class="opt">a) Se reconoce el gasto por arriendo de octubre aunque la factura llegue recién en noviembre.</button>
-            <button class="opt">b) Se reconoce un ingreso por venta solo cuando el cliente transfiere el dinero, sin importar cuándo se entregó el producto.</button>
-            <button class="opt">c) Se registra la compra de un vehículo como gasto del mes porque se pagó al contado.</button>
-            <button class="opt">d) No se registra un gasto por comisiones de venta porque el vendedor aún no presenta la boleta.</button>
+            <button class="opt">a) Se registra la compra de un vehículo como gasto del mes porque se pagó al contado.</button>
+            <button class="opt">b) Se reconoce el gasto por arriendo de octubre aunque la factura llegue recién en noviembre.</button>
+            <button class="opt">c) No se registra un gasto por comisiones de venta porque el vendedor aún no presenta la boleta.</button>
+            <button class="opt">d) Se reconoce un ingreso por venta solo cuando el cliente transfiere el dinero, sin importar cuándo se entregó el producto.</button>
           </div>
           <p class="justif" hidden>Bajo Devengado, el gasto se reconoce en el período en que se incurre económicamente, sin importar cuándo llega la factura, se paga o se documenta.</p>
         </div>
@@ -660,6 +818,16 @@
     });
   });
 
+  // Acordeón de principios y términos (página Resumen)
+  document.querySelectorAll('.principle-btn, .term-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const panel = btn.nextElementSibling;
+      const expanded = btn.getAttribute('aria-expanded') === 'true';
+      btn.setAttribute('aria-expanded', String(!expanded));
+      panel.hidden = expanded;
+    });
+  });
+
   // Score
   let score = 0;
   const scoreEl = document.getElementById('score');
@@ -721,7 +889,10 @@
         }
         updateScore();
         const j = block.querySelector('.justif');
-        if (j) j.hidden = false;
+        if (j) {
+          j.hidden = false;
+          j.classList.add(val === correct ? 'correct-fb' : 'incorrect-fb');
+        }
       });
     });
   });
