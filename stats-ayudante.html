@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel en vivo — Ayudantía 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Lora:ital,wght@0,400;0,600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#eef3ea; --ink:#1e2a38; --ink-soft:#55677a;
+    --credit-green:#2f6b48; --debit-red:#a13d3d; --gold:#a9822f;
+    --paper-line:#c3d6c4; --card-bg:#f8faf5;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--paper); color:var(--ink); font-family:'Lora',serif; padding:32px 20px 60px;}
+  .wrap{max-width:760px; margin:0 auto;}
+  h1{font-family:'Special Elite',monospace; font-size:1.4rem; margin:0 0 4px;}
+  .sub{color:var(--ink-soft); font-size:.85rem; margin:0 0 20px;}
+  .topbar{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:22px;}
+  .summary{
+    display:flex; gap:14px; flex-wrap:wrap; background:#fff; border:1px solid var(--paper-line);
+    padding:14px 18px; margin-bottom:26px; font-family:'IBM Plex Mono',monospace; font-size:.85rem;
+  }
+  .summary strong{color:var(--credit-green); font-size:1.1rem;}
+  button#reset-btn{
+    font-family:'IBM Plex Mono',monospace; font-size:.75rem; background:#fff; border:1px solid var(--debit-red);
+    color:var(--debit-red); padding:8px 14px; cursor:pointer; border-radius:3px;
+  }
+  button#reset-btn:hover{background:#faeeee;}
+  h2.qtitle{font-family:'Special Elite',monospace; font-size:.95rem; margin:26px 0 4px; color:var(--ink);}
+  p.qhint{color:var(--ink-soft); font-size:.8rem; margin:0 0 10px;}
+  .bar-row{display:flex; align-items:center; gap:10px; margin-bottom:6px; font-size:.85rem;}
+  .bar-label{width:150px; flex-shrink:0; font-family:'IBM Plex Mono',monospace; font-size:.75rem; color:var(--ink-soft);}
+  .bar-track{flex:1; background:#e4ece1; border-radius:3px; overflow:hidden; height:18px; position:relative;}
+  .bar-fill{height:100%; background:#b9c9bd;}
+  .bar-fill.correct{background:var(--credit-green);}
+  .bar-pct{width:80px; flex-shrink:0; text-align:right; font-family:'IBM Plex Mono',monospace; font-size:.78rem;}
+  .status{font-family:'IBM Plex Mono',monospace; font-size:.75rem; color:var(--ink-soft); margin-top:24px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div>
+      <h1>Panel en vivo — Ayudantía 1</h1>
+      <p class="sub">Se actualiza solo cada 2 segundos. No compartir este link con los alumnos.</p>
+    </div>
+    <button id="reset-btn">Reiniciar datos</button>
+  </div>
+
+  <div class="summary">
+    <span>Promedio de aciertos: <strong id="avg-pct">—</strong></span>
+    <span>Respuestas registradas: <strong id="total-responses">—</strong></span>
+  </div>
+
+  <div id="mc-container"></div>
+  <div id="tf-container"></div>
+  <p class="status" id="status">Cargando…</p>
+</div>
+
+<script>
+  const MC_META = {
+    P1: { hint: 'Pasivo contable' },
+    P2: { hint: 'Seguro de bodega' },
+    P3: { hint: 'Resultado del ejercicio' },
+    P4: { hint: 'Compra de maquinaria' },
+    P5: { hint: 'Principio de Devengado' }
+  };
+  const MC_LABELS = ['a', 'b', 'c', 'd', 'e'];
+
+  const TF_META = {
+    tf1: 'Capital = efectivo disponible',
+    tf2: 'Dividendo como gasto',
+    tf3: 'Costo histórico se actualiza solo',
+    tf4: 'Patrimonio puede ser negativo',
+    tf5: 'Patente como activo',
+    tf6: 'Devengado = pago en efectivo'
+  };
+
+  async function refresh(){
+    try{
+      const res = await fetch('/api/stats');
+      const data = await res.json();
+      if (data.error){ document.getElementById('status').textContent = data.error; return; }
+
+      const mcContainer = document.getElementById('mc-container');
+      const tfContainer = document.getElementById('tf-container');
+      mcContainer.innerHTML = '';
+      tfContainer.innerHTML = '';
+
+      let pctSum = 0, pctCount = 0, maxTotal = 0;
+
+      Object.entries(data.mc).forEach(([qid, q]) => {
+        maxTotal = Math.max(maxTotal, q.total);
+        pctSum += q.correctPercent; pctCount++;
+        const title = document.createElement('h2');
+        title.className = 'qtitle';
+        title.textContent = `${qid} — ${q.correctPercent}% correcto (${q.total} respuestas)`;
+        mcContainer.appendChild(title);
+        const hint = document.createElement('p');
+        hint.className = 'qhint';
+        hint.textContent = MC_META[qid] ? MC_META[qid].hint : '';
+        mcContainer.appendChild(hint);
+        q.counts.forEach((c, i) => {
+          const row = document.createElement('div');
+          row.className = 'bar-row';
+          const isCorrect = i === q.correctIndex;
+          row.innerHTML = `
+            <span class="bar-label">${MC_LABELS[i]})</span>
+            <span class="bar-track"><span class="bar-fill${isCorrect ? ' correct' : ''}" style="width:${q.percents[i]}%"></span></span>
+            <span class="bar-pct">${q.percents[i]}% (${c})</span>`;
+          mcContainer.appendChild(row);
+        });
+      });
+
+      Object.entries(data.tf).forEach(([qid, q]) => {
+        maxTotal = Math.max(maxTotal, q.total);
+        pctSum += q.correctPercent; pctCount++;
+        const title = document.createElement('h2');
+        title.className = 'qtitle';
+        title.textContent = `${qid.toUpperCase()} — ${q.correctPercent}% correcto (${q.total} respuestas)`;
+        tfContainer.appendChild(title);
+        const hint = document.createElement('p');
+        hint.className = 'qhint';
+        hint.textContent = TF_META[qid] || '';
+        tfContainer.appendChild(hint);
+        [['Verdadero', q.truePercent, q.true, q.correctValue === true],
+         ['Falso', q.falsePercent, q.false, q.correctValue === false]].forEach(([label, pct, count, isCorrect]) => {
+          const row = document.createElement('div');
+          row.className = 'bar-row';
+          row.innerHTML = `
+            <span class="bar-label">${label}</span>
+            <span class="bar-track"><span class="bar-fill${isCorrect ? ' correct' : ''}" style="width:${pct}%"></span></span>
+            <span class="bar-pct">${pct}% (${count})</span>`;
+          tfContainer.appendChild(row);
+        });
+      });
+
+      document.getElementById('avg-pct').textContent = pctCount ? Math.round(pctSum / pctCount) + '%' : '—';
+      document.getElementById('total-responses').textContent = maxTotal;
+      document.getElementById('status').textContent = 'Actualizado ' + new Date().toLocaleTimeString('es-CL');
+    } catch(err){
+      document.getElementById('status').textContent = 'No se pudo conectar con el servidor.';
+    }
+  }
+
+  document.getElementById('reset-btn').addEventListener('click', async () => {
+    if (!confirm('¿Reiniciar todos los datos guardados? Esto no se puede deshacer.')) return;
+    await fetch('/api/reset', { method: 'POST' });
+    refresh();
+  });
+
+  refresh();
+  setInterval(refresh, 2000);
+</script>
+</body>
+</html>
