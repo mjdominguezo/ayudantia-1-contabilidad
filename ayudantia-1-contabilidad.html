@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ayudantía 1 — Contabilidad y Costos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#eef3ea;
+    --paper-line:#c3d6c4;
+    --margin-red:#b3453f;
+    --ink:#1e2a38;
+    --ink-soft:#55677a;
+    --credit-green:#2f6b48;
+    --debit-red:#a13d3d;
+    --gold:#a9822f;
+    --card-bg:#f8faf5;
+    --radius:2px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    background-image:repeating-linear-gradient(
+      to bottom,
+      transparent,
+      transparent 35px,
+      var(--paper-line) 36px
+    );
+    color:var(--ink);
+    font-family:'Lora',serif;
+    line-height:1.55;
+  }
+  .ledger{
+    position:relative;
+    max-width:840px;
+    margin:0 auto;
+    padding:48px 28px 80px 76px;
+  }
+  .ledger::before{
+    content:"";
+    position:absolute;
+    left:52px;
+    top:0;
+    bottom:0;
+    width:2px;
+    background:var(--margin-red);
+    opacity:.55;
+  }
+  header{margin-bottom:28px;}
+  .folio-tag{
+    display:inline-block;
+    font-family:'Special Elite',monospace;
+    font-size:.72rem;
+    letter-spacing:.12em;
+    color:var(--margin-red);
+    border:1.5px solid var(--margin-red);
+    padding:3px 10px;
+    transform:rotate(-2deg);
+    border-radius:var(--radius);
+    margin-bottom:14px;
+  }
+  h1{
+    font-family:'Special Elite',monospace;
+    font-size:clamp(1.4rem,4vw,2.05rem);
+    letter-spacing:.01em;
+    margin:0 0 6px;
+    color:var(--ink);
+  }
+  .subtitle{
+    font-style:italic;
+    color:var(--ink-soft);
+    margin:0 0 16px;
+    font-size:1.02rem;
+  }
+  .meta{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:.74rem;
+    color:var(--ink-soft);
+    display:flex;
+    flex-wrap:wrap;
+    gap:4px 10px;
+    border-top:1px solid var(--paper-line);
+    padding-top:10px;
+  }
+  .meta span:not(:last-child)::after{content:"·"; margin-left:10px; color:var(--paper-line);}
+
+  nav.tabs{
+    display:flex;
+    gap:6px;
+    margin:30px 0 0;
+  }
+  nav.tabs button{
+    font-family:'Special Elite',monospace;
+    font-size:.85rem;
+    background:#e0e8dd;
+    color:var(--ink-soft);
+    border:1px solid var(--paper-line);
+    border-bottom:none;
+    padding:9px 16px 8px;
+    border-radius:6px 6px 0 0;
+    cursor:pointer;
+  }
+  nav.tabs button.active{
+    background:var(--card-bg);
+    color:var(--ink);
+    box-shadow:0 -2px 0 var(--gold) inset;
+  }
+  main{
+    background:var(--card-bg);
+    border:1px solid var(--paper-line);
+    padding:28px clamp(16px,4vw,36px) 40px;
+  }
+  .page{display:none;}
+  .page.active{display:block;}
+
+  h2.section-title{
+    font-family:'Special Elite',monospace;
+    font-size:1.05rem;
+    color:var(--gold);
+    letter-spacing:.03em;
+    margin:0 0 4px;
+  }
+  .section-sub{color:var(--ink-soft); font-size:.85rem; margin:0 0 20px;}
+
+  .principle-row{
+    display:grid;
+    grid-template-columns:34px 1fr;
+    gap:12px;
+    padding:14px 0;
+    border-bottom:1px dashed var(--paper-line);
+  }
+  .principle-row:last-child{border-bottom:none;}
+  .principle-num{
+    font-family:'IBM Plex Mono',monospace;
+    color:var(--margin-red);
+    font-size:.85rem;
+    padding-top:2px;
+  }
+  .principle-row strong{display:block; margin-bottom:3px;}
+  .principle-row p{margin:0; color:var(--ink); font-size:.95rem;}
+
+  .equation-box{
+    margin:32px 0 24px;
+    border:2px double var(--ink);
+    padding:22px;
+    text-align:center;
+    background:#fbfcf9;
+  }
+  .equation-box .eq{
+    font-family:'Special Elite',monospace;
+    font-size:clamp(1.1rem,4vw,1.5rem);
+    letter-spacing:.02em;
+  }
+  .terms-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:14px;
+    margin-top:24px;
+  }
+  .term-card{
+    background:#fff;
+    border:1px solid var(--paper-line);
+    padding:14px;
+  }
+  .term-card h3{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:.8rem;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    color:var(--margin-red);
+    margin:0 0 6px;
+  }
+  .term-card p{margin:0; font-size:.87rem;}
+
+  .score-bar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:8px;
+    background:#fff;
+    border:1px solid var(--paper-line);
+    padding:12px 16px;
+    margin-bottom:28px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:.85rem;
+  }
+  .score-bar strong{color:var(--credit-green); font-size:1rem;}
+
+  .exercise-block{
+    margin-bottom:26px;
+    padding-bottom:22px;
+    border-bottom:1px solid var(--paper-line);
+  }
+  .exercise-block:last-child{border-bottom:none;}
+  .exercise-label{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:.72rem;
+    color:var(--ink-soft);
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    margin-bottom:6px;
+  }
+  .exercise-block > p.statement{margin:0 0 12px; font-size:.96rem;}
+  ol.roman{margin:0 0 12px 0; padding-left:22px; font-size:.92rem; color:var(--ink);}
+  ol.roman li{margin-bottom:3px;}
+
+  .options{display:flex; flex-direction:column; gap:8px;}
+  button.opt, .tf-btn, .reveal-btn{
+    font-family:'Lora',serif;
+    font-size:.93rem;
+    text-align:left;
+    background:#fff;
+    border:1px solid var(--paper-line);
+    padding:10px 14px;
+    cursor:pointer;
+    color:var(--ink);
+    border-radius:var(--radius);
+    transition:background .15s ease, border-color .15s ease;
+  }
+  button.opt:hover:not(:disabled), .tf-btn:hover:not(:disabled), .reveal-btn:hover{
+    border-color:var(--gold);
+    background:#fffdf6;
+  }
+  button.opt:focus-visible, .tf-btn:focus-visible, .reveal-btn:focus-visible, nav.tabs button:focus-visible{
+    outline:2px solid var(--gold);
+    outline-offset:2px;
+  }
+  button.opt:disabled{cursor:default;}
+  button.opt.correct{
+    border-color:var(--credit-green);
+    background:#eef7f0;
+    color:var(--credit-green);
+    font-weight:600;
+  }
+  button.opt.incorrect{
+    border-color:var(--debit-red);
+    background:#faeeee;
+    color:var(--debit-red);
+    text-decoration:line-through;
+  }
+  .tf-row{display:flex; gap:10px; margin-bottom:10px;}
+  .tf-btn{min-width:110px; text-align:center;}
+  .tf-btn.correct{border-color:var(--credit-green); background:#eef7f0; color:var(--credit-green); font-weight:600;}
+  .tf-btn.incorrect{border-color:var(--debit-red); background:#faeeee; color:var(--debit-red);}
+
+  .stamp{
+    display:inline-block;
+    font-family:'Special Elite',monospace;
+    font-size:.78rem;
+    letter-spacing:.06em;
+    padding:4px 10px;
+    border:2px solid;
+    border-radius:3px;
+    margin-top:10px;
+    transform:rotate(-3deg);
+    animation:stampIn .25s ease-out;
+  }
+  .stamp.ok{color:var(--credit-green); border-color:var(--credit-green);}
+  .stamp.bad{color:var(--debit-red); border-color:var(--debit-red);}
+  @keyframes stampIn{
+    from{opacity:0; transform:rotate(-3deg) scale(1.6);}
+    to{opacity:1; transform:rotate(-3deg) scale(1);}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .stamp{animation:none;}
+    html{scroll-behavior:auto;}
+  }
+
+  .justif, .answer{
+    margin-top:10px;
+    padding:10px 12px;
+    background:#fbf8ee;
+    border-left:3px solid var(--gold);
+    font-size:.88rem;
+    color:var(--ink);
+  }
+
+  table.tx-table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:10px;
+    font-size:.85rem;
+  }
+  table.tx-table th, table.tx-table td{
+    border:1px solid var(--paper-line);
+    padding:6px 8px;
+    text-align:left;
+  }
+  table.tx-table th{
+    background:#f1f4ec;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:.72rem;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    color:var(--ink-soft);
+  }
+
+  footer{
+    text-align:center;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:.7rem;
+    color:var(--ink-soft);
+    margin-top:26px;
+  }
+
+  @media (max-width:600px){
+    .ledger{padding:36px 16px 60px 42px;}
+    .ledger::before{left:26px;}
+    .terms-grid{grid-template-columns:1fr;}
+    .tf-row{flex-wrap:wrap;}
+  }
+</style>
+</head>
+<body>
+<div class="ledger">
+
+  <header>
+    <span class="folio-tag">Ayudantía N.º 1</span>
+    <h1>Contabilidad y Costos</h1>
+    <p class="subtitle">Principios Contables Fundamentales (PCGA)</p>
+    <div class="meta">
+      <span>Universidad del Desarrollo</span>
+      <span>Facultad de Ingeniería</span>
+      <span>Prof. Claudio Olivares</span>
+      <span>Sección 2</span>
+      <span>Ayudante: María Jesús Domínguez Ossandón</span>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-target="resumen">Página I — Resumen</button>
+    <button class="tab-btn" data-target="ejercicios">Página II — Ejercicios</button>
+  </nav>
+
+  <main>
+    <!-- ================= RESUMEN ================= -->
+    <section id="resumen" class="page active">
+      <h2 class="section-title">Principios Contables Fundamentales</h2>
+      <p class="section-sub">Ocho principios que ordenan cómo y cuándo se registra la información contable.</p>
+
+      <div class="principle-row"><span class="principle-num">01</span><div><strong>Entidad</strong><p>La contabilidad se lleva para la empresa como un ente separado de sus dueños; no deben mezclarse los recursos u obligaciones personales de los socios con los de la empresa.</p></div></div>
+
+      <div class="principle-row"><span class="principle-num">02</span><div><strong>Valuación al costo (costo histórico)</strong><p>Los activos se registran al valor pagado en el momento de su adquisición, y no se ajustan posteriormente por cambios en su valor de mercado.</p></div></div>
+
+      <div class="principle-row"><span class="principle-num">03</span><div><strong>Partida doble</strong><p>Toda transacción afecta al menos dos cuentas contables, de modo que la ecuación Activos = Pasivos + Patrimonio se mantenga siempre equilibrada.</p></div></div>
+
+      <div class="principle-row"><span class="principle-num">04</span><div><strong>Devengado (o acumulación)</strong><p>Los ingresos y gastos se reconocen en el período en que ocurren económicamente, independientemente de si existe un flujo de caja asociado en ese mismo momento.</p></div></div>
+
+      <div class="principle-row"><span class="principle-num">05</span><div><strong>Realización</strong><p>La utilidad de una venta se reconoce cuando el bien se entrega o el servicio se presta al cliente, y no antes (por ejemplo, no al recibir un anticipo).</p></div></div>
+
+      <div class="principle-row"><span class="principle-num">06</span><div><strong>Prudencia o criterio conservador</strong><p>Frente a dos valores posibles para una partida, se prefiere aquel que no sobreestime activos ni utilidades.</p></div></div>
+
+      <div class="principle-row"><span class="principle-num">07</span><div><strong>Materialidad</strong><p>Los principios contables se aplican cuando las cifras involucradas son significativas; los montos poco relevantes admiten mayor flexibilidad.</p></div></div>
+
+      <div class="principle-row"><span class="principle-num">08</span><div><strong>Consistencia</strong><p>Una vez adoptado un criterio contable, la empresa debe mantenerlo en el tiempo, salvo justificación de cambio.</p></div></div>
+
+      <div class="equation-box">
+        <div class="eq">Activos&nbsp; = &nbsp;Pasivos&nbsp; + &nbsp;Patrimonio</div>
+      </div>
+
+      <div class="terms-grid">
+        <div class="term-card">
+          <h3>Activos</h3>
+          <p>Recursos controlados por la empresa, originados en transacciones pasadas, con potencial de generar beneficios económicos futuros.</p>
+        </div>
+        <div class="term-card">
+          <h3>Pasivos</h3>
+          <p>Obligaciones actuales de la empresa con terceros, que implicarán una salida futura de recursos.</p>
+        </div>
+        <div class="term-card">
+          <h3>Patrimonio</h3>
+          <p>Derecho residual de los dueños sobre los activos de la empresa, una vez descontados los pasivos.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= EJERCICIOS ================= -->
+    <section id="ejercicios" class="page">
+
+      <div class="score-bar">
+        <span>Selección múltiple + Verdadero/Falso</span>
+        <span><strong id="score">0</strong> / 11 correctas</span>
+      </div>
+
+      <h2 class="section-title">1 · Casos de análisis</h2>
+      <p class="section-sub">Indica qué principio contable se transgrede en cada caso. Haz clic para revelar la respuesta.</p>
+
+      <div class="exercise-block">
+        <p class="exercise-label">Caso A</p>
+        <p class="statement">La empresa "Panadería Doña Rosa" pagó, con fondos de la cuenta corriente de la empresa, las vacaciones familiares del dueño. El contador registró este movimiento como "Gasto de Representación" para reducir la base tributable del mes.</p>
+        <button class="reveal-btn">Revelar respuesta</button>
+        <div class="answer" hidden><strong>Principio transgredido: Entidad.</strong> Los gastos personales del dueño no deben registrarse en la contabilidad de la empresa, independientemente de cómo se etiquete la cuenta.</div>
+      </div>
+
+      <div class="exercise-block">
+        <p class="exercise-label">Caso B</p>
+        <p class="statement">"Transportes del Sur" compró un terreno en $40.000.000. Seis meses después, un tasador estimó que el valor de mercado del terreno había subido a $55.000.000. Para mostrar un balance más atractivo ante los inversionistas, el gerente ordenó registrar el terreno por $55.000.000, reconociendo una ganancia de $15.000.000.</p>
+        <button class="reveal-btn">Revelar respuesta</button>
+        <div class="answer" hidden><strong>Principio transgredido: Valuación al costo (costo histórico).</strong> El terreno debe permanecer registrado al precio de adquisición ($40.000.000), sin reconocer ganancias por plusvalías no realizadas.</div>
+      </div>
+
+      <div class="exercise-block">
+        <p class="exercise-label">Caso C</p>
+        <p class="statement">"Comercial El Ahorro" recibió de un cliente el pago del 100% de un pedido por $2.000.000, cuya mercadería está lista para despacharse la próxima semana. El contador registró de inmediato la venta y su utilidad, argumentando que "la plata ya está en la cuenta, así que la venta ya se ganó".</p>
+        <button class="reveal-btn">Revelar respuesta</button>
+        <div class="answer" hidden><strong>Principio transgredido: Realización.</strong> El ingreso no se reconoce al recibir el anticipo, sino cuando la mercadería se despache al cliente. Mientras tanto, debe reconocerse un pasivo "Ingresos percibidos por adelantado".</div>
+      </div>
+
+      <h2 class="section-title">2 · Selección múltiple</h2>
+      <p class="section-sub">Elige una alternativa. Se marcará en verde la correcta.</p>
+
+      <div class="exercise-block">
+        <p class="exercise-label">P1</p>
+        <p class="statement">Indique cuál(es) ítem(s) de la siguiente lista debe(n) ser reconocido(s) como pasivo contable por una empresa:</p>
+        <ol class="roman">
+          <li>Impuestos retenidos a los trabajadores, pendientes de pago al Fisco.</li>
+          <li>La intención de una empresa de renovar su flota de vehículos el próximo año.</li>
+          <li>La obligación de devolver un anticipo recibido de un cliente si no se le entrega el producto contratado.</li>
+        </ol>
+        <div class="mc" data-correct="1">
+          <div class="options">
+            <button class="opt">a) Solo I</button>
+            <button class="opt">b) Solo I y III</button>
+            <button class="opt">c) Solo III</button>
+            <button class="opt">d) Solo II y III</button>
+            <button class="opt">e) Todas</button>
+          </div>
+          <p class="justif" hidden>I y III son obligaciones actuales de la empresa con terceros (pasivo). II es solo una intención futura, no una obligación presente, por lo que no se reconoce como pasivo.</p>
+        </div>
+      </div>
+
+      <div class="exercise-block">
+        <p class="exercise-label">P2</p>
+        <p class="statement">Si el 1 de marzo de 2026 una empresa paga $3.600 por un seguro de bodega con vigencia hasta el 1 de marzo de 2027, entonces es correcto afirmar que:</p>
+        <ol class="roman">
+          <li>Al momento de pagar, aumenta el activo "Bodega" y disminuye "Caja".</li>
+          <li>Al momento de pagar, disminuye "Caja" y se reconoce de inmediato un "Gasto por Seguros" de $3.600.</li>
+          <li>Durante el año 2027 se reconocerá un gasto por $600.</li>
+        </ol>
+        <div class="mc" data-correct="1">
+          <div class="options">
+            <button class="opt">a) Sólo I</button>
+            <button class="opt">b) Sólo III</button>
+            <button class="opt">c) I y III</button>
+            <button class="opt">d) Todas</button>
+          </div>
+          <p class="justif" hidden>Al pagar, lo correcto es reconocer un activo "Seguro pagado por anticipado" (no "Bodega" ni un gasto inmediato). La cobertura son 12 meses a $300 mensuales; entre el 1 de enero y el 1 de marzo de 2027 corresponden 2 meses, es decir $600 de gasto en 2027.</p>
+        </div>
+      </div>
+
+      <div class="exercise-block">
+        <p class="exercise-label">P3</p>
+        <p class="statement">Si una empresa presenta un Resultado del Ejercicio positivo de $50 millones al cierre de un período contable, es correcto afirmar que:</p>
+        <ol class="roman">
+          <li>El Patrimonio de la empresa aumentó en $50 millones respecto al período anterior.</li>
+          <li>Las Utilidades Retenidas podrían disminuir si la empresa repartió dividendos superiores a la utilidad del período.</li>
+          <li>La empresa necesariamente cuenta con más efectivo disponible que al inicio del período.</li>
+        </ol>
+        <div class="mc" data-correct="1">
+          <div class="options">
+            <button class="opt">a) Sólo I</button>
+            <button class="opt">b) Sólo II</button>
+            <button class="opt">c) I y II</button>
+            <button class="opt">d) Ninguna</button>
+          </div>
+          <p class="justif" hidden>El Patrimonio puede moverse por otras partidas además de la utilidad (aportes, retiros), por lo que I no es necesariamente cierto. III es falso por el principio de devengado: utilidad no equivale a caja. II es correcto: si se reparten dividendos superiores a la utilidad del período, las utilidades retenidas acumuladas disminuyen.</p>
+        </div>
+      </div>
+
+      <div class="exercise-block">
+        <p class="exercise-label">P4</p>
+        <p class="statement">La empresa "ConstruMax" compra maquinaria por $8.000.000, pagando 40% al contado y firmando un pagaré por el resto a 90 días. ¿Cuál es el efecto neto en la ecuación contable al momento de la compra?</p>
+        <div class="mc" data-correct="1">
+          <div class="options">
+            <button class="opt">a) Aumenta un Activo por $8.000.000 y aumenta el Patrimonio por $8.000.000.</button>
+            <button class="opt">b) Aumenta un Activo por $8.000.000, disminuye un Activo por $3.200.000 y aumenta un Pasivo por $4.800.000.</button>
+            <button class="opt">c) Aumenta un Activo por $4.800.000 y aumenta un Pasivo por $4.800.000.</button>
+            <button class="opt">d) Disminuye un Activo por $3.200.000 y aumenta un Patrimonio por $4.800.000.</button>
+          </div>
+          <p class="justif" hidden>Maquinaria (activo) aumenta $8.000.000; Caja (activo) disminuye $3.200.000 (el 40% pagado al contado); Pasivo (pagaré) aumenta $4.800.000 (el 60% restante).</p>
+        </div>
+      </div>
+
+      <div class="exercise-block">
+        <p class="exercise-label">P5</p>
+        <p class="statement">¿En qué situación se está aplicando correctamente el principio de Devengado?</p>
+        <div class="mc" data-correct="0">
+          <div class="options">
+            <button class="opt">a) Se reconoce el gasto por arriendo de octubre aunque la factura llegue recién en noviembre.</button>
+            <button class="opt">b) Se reconoce un ingreso por venta solo cuando el cliente transfiere el dinero, sin importar cuándo se entregó el producto.</button>
+            <button class="opt">c) Se registra la compra de un vehículo como gasto del mes porque se pagó al contado.</button>
+            <button class="opt">d) No se registra un gasto por comisiones de venta porque el vendedor aún no presenta la boleta.</button>
+          </div>
+          <p class="justif" hidden>Bajo Devengado, el gasto se reconoce en el período en que se incurre económicamente, sin importar cuándo llega la factura, se paga o se documenta.</p>
+        </div>
+      </div>
+
+      <h2 class="section-title">3 · Verdadero o Falso</h2>
+      <p class="section-sub">Elige V o F. Se mostrará la justificación al responder.</p>
+
+      <div class="exercise-block">
+        <p class="exercise-label">Afirmación 1</p>
+        <p class="statement">Si la cuenta "Capital" de una empresa es alta, entonces la empresa necesariamente cuenta con suficiente efectivo para pagar sus deudas de corto plazo.</p>
+        <div class="tf" data-correct="false">
+          <div class="tf-row"><button class="tf-btn" data-value="true">Verdadero</button><button class="tf-btn" data-value="false">Falso</button></div>
+          <div class="justif" hidden><strong>Falso.</strong> El Capital es una cuenta patrimonial (aporte histórico de los socios), no efectivo disponible; la liquidez depende de los activos líquidos que la empresa tenga en ese momento.</div>
+        </div>
+      </div>
+
+      <div class="exercise-block">
+        <p class="exercise-label">Afirmación 2</p>
+        <p class="statement">Cuando una empresa reparte un dividendo en efectivo a sus accionistas, dicho pago debe registrarse como un gasto del ejercicio, disminuyendo la utilidad y, por ende, el impuesto a pagar.</p>
+        <div class="tf" data-correct="false">
+          <div class="tf-row"><button class="tf-btn" data-value="true">Verdadero</button><button class="tf-btn" data-value="false">Falso</button></div>
+          <div class="justif" hidden><strong>Falso.</strong> El reparto de dividendos no es un gasto, sino una distribución del patrimonio; no afecta el Estado de Resultados ni el impuesto a la renta.</div>
+        </div>
+      </div>
+
+      <div class="exercise-block">
+        <p class="exercise-label">Afirmación 3</p>
+        <p class="statement">El costo histórico de un activo se actualiza automáticamente cada año según la inflación y las condiciones de mercado.</p>
+        <div class="tf" data-correct="false">
+          <div class="tf-row"><button class="tf-btn" data-value="true">Verdadero</button><button class="tf-btn" data-value="false">Falso</button></div>
+          <div class="justif" hidden><strong>Falso.</strong> El costo histórico corresponde al valor pagado en la adquisición y, por regla general, no se revaloriza.</div>
+        </div>
+      </div>
+
+      <div class="exercise-block">
+        <p class="exercise-label">Afirmación 4</p>
+        <p class="statement">Es posible que el Patrimonio total de una empresa sea negativo, si las pérdidas acumuladas superan los aportes de capital realizados por los socios.</p>
+        <div class="tf" data-correct="true">
+          <div class="tf-row"><button class="tf-btn" data-value="true">Verdadero</button><button class="tf-btn" data-value="false">Falso</button></div>
+          <div class="justif" hidden><strong>Verdadero.</strong> Si las pérdidas acumuladas superan los aportes de capital, el Patrimonio puede quedar con saldo negativo (deudor).</div>
+        </div>
+      </div>
+
+      <div class="exercise-block">
+        <p class="exercise-label">Afirmación 5</p>
+        <p class="statement">Una patente registrada por la empresa, que no tiene existencia física pero genera beneficios económicos futuros controlados por ella, constituye un activo contable.</p>
+        <div class="tf" data-correct="true">
+          <div class="tf-row"><button class="tf-btn" data-value="true">Verdadero</button><button class="tf-btn" data-value="false">Falso</button></div>
+          <div class="justif" hidden><strong>Verdadero.</strong> Los activos intangibles (como patentes o marcas) también constituyen activos contables, no solo los recursos tangibles.</div>
+        </div>
+      </div>
+
+      <div class="exercise-block">
+        <p class="exercise-label">Afirmación 6</p>
+        <p class="statement">Bajo el principio de Devengado, un gasto se reconoce en el período en que efectivamente se paga en efectivo, independientemente de cuándo se haya incurrido en la obligación.</p>
+        <div class="tf" data-correct="false">
+          <div class="tf-row"><button class="tf-btn" data-value="true">Verdadero</button><button class="tf-btn" data-value="false">Falso</button></div>
+          <div class="justif" hidden><strong>Falso.</strong> Bajo Devengado, el gasto se reconoce cuando se incurre en la obligación, independientemente de cuándo se pague en efectivo.</div>
+        </div>
+      </div>
+
+      <h2 class="section-title">4 · Transacciones</h2>
+      <p class="section-sub">Indica el tipo de cuenta (activo, pasivo o patrimonio) y si aumenta o disminuye. Haz clic para revelar la respuesta.</p>
+
+      <div class="exercise-block">
+        <p class="exercise-label">Transacción 1</p>
+        <p class="statement">Los socios aportan un vehículo valorado en $12.000.000 como parte de su capital.</p>
+        <button class="reveal-btn">Revelar respuesta</button>
+        <table class="tx-table" hidden>
+          <tr><th>Cuenta</th><th>Tipo</th><th>Efecto</th></tr>
+          <tr><td>Vehículo</td><td>Activo</td><td>Aumenta</td></tr>
+          <tr><td>Capital</td><td>Patrimonio</td><td>Aumenta</td></tr>
+        </table>
+      </div>
+
+      <div class="exercise-block">
+        <p class="exercise-label">Transacción 2</p>
+        <p class="statement">Se venden servicios de consultoría por $18.000.000, 40% al contado y 60% a crédito.</p>
+        <button class="reveal-btn">Revelar respuesta</button>
+        <table class="tx-table" hidden>
+          <tr><th>Cuenta</th><th>Tipo</th><th>Efecto</th></tr>
+          <tr><td>Caja</td><td>Activo</td><td>Aumenta</td></tr>
+          <tr><td>Cuentas x Cobrar</td><td>Activo</td><td>Aumenta</td></tr>
+          <tr><td>Ingreso x Venta (Servicios)</td><td>Patrimonio / Ingreso</td><td>Aumenta</td></tr>
+        </table>
+      </div>
+
+      <div class="exercise-block">
+        <p class="exercise-label">Transacción 3</p>
+        <p class="statement">Se pagan remuneraciones por $2.400.000 mediante transferencia bancaria.</p>
+        <button class="reveal-btn">Revelar respuesta</button>
+        <table class="tx-table" hidden>
+          <tr><th>Cuenta</th><th>Tipo</th><th>Efecto</th></tr>
+          <tr><td>Gasto x Sueldo</td><td>Patrimonio / Gasto</td><td>Disminuye</td></tr>
+          <tr><td>Banco</td><td>Activo</td><td>Disminuye</td></tr>
+        </table>
+      </div>
+
+      <div class="exercise-block">
+        <p class="exercise-label">Transacción 4</p>
+        <p class="statement">Se compra mobiliario de oficina por $3.500.000, pagando $1.000.000 en efectivo y el resto a crédito.</p>
+        <button class="reveal-btn">Revelar respuesta</button>
+        <table class="tx-table" hidden>
+          <tr><th>Cuenta</th><th>Tipo</th><th>Efecto</th></tr>
+          <tr><td>Mobiliario</td><td>Activo</td><td>Aumenta</td></tr>
+          <tr><td>Caja</td><td>Activo</td><td>Disminuye</td></tr>
+          <tr><td>Cuentas x Pagar</td><td>Pasivo</td><td>Aumenta</td></tr>
+        </table>
+      </div>
+
+      <div class="exercise-block">
+        <p class="exercise-label">Transacción 5</p>
+        <p class="statement">Se vende maquinaria en desuso de la empresa por $900.000 al contado.</p>
+        <button class="reveal-btn">Revelar respuesta</button>
+        <table class="tx-table" hidden>
+          <tr><th>Cuenta</th><th>Tipo</th><th>Efecto</th></tr>
+          <tr><td>Caja</td><td>Activo</td><td>Aumenta</td></tr>
+          <tr><td>Maquinaria</td><td>Activo</td><td>Disminuye</td></tr>
+        </table>
+      </div>
+
+      <div class="exercise-block">
+        <p class="exercise-label">Transacción 6</p>
+        <p class="statement">Se compra mercadería por $4.200.000, pagando $1.200.000 en efectivo y el resto a crédito con proveedores.</p>
+        <button class="reveal-btn">Revelar respuesta</button>
+        <table class="tx-table" hidden>
+          <tr><th>Cuenta</th><th>Tipo</th><th>Efecto</th></tr>
+          <tr><td>Existencias</td><td>Activo</td><td>Aumenta</td></tr>
+          <tr><td>Caja</td><td>Activo</td><td>Disminuye</td></tr>
+          <tr><td>Cuentas x Pagar</td><td>Pasivo</td><td>Aumenta</td></tr>
+        </table>
+      </div>
+
+      <div class="exercise-block">
+        <p class="exercise-label">Transacción 7</p>
+        <p class="statement">Se paga la cuenta de arriendo de la bodega por $600.000 al contado.</p>
+        <button class="reveal-btn">Revelar respuesta</button>
+        <table class="tx-table" hidden>
+          <tr><th>Cuenta</th><th>Tipo</th><th>Efecto</th></tr>
+          <tr><td>Gastos Generales (Arriendo)</td><td>Patrimonio / Gasto</td><td>Disminuye</td></tr>
+          <tr><td>Caja</td><td>Activo</td><td>Disminuye</td></tr>
+        </table>
+      </div>
+
+    </section>
+  </main>
+
+  <footer>Ayudantía 1 · Contabilidad y Costos · 2026-2</footer>
+</div>
+
+<script>
+  // Tabs
+  const tabBtns = document.querySelectorAll('.tab-btn');
+  const pages = document.querySelectorAll('.page');
+  tabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      tabBtns.forEach(b => b.classList.remove('active'));
+      pages.forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.target).classList.add('active');
+      window.scrollTo({top:0, behavior:'smooth'});
+    });
+  });
+
+  // Score
+  let score = 0;
+  const scoreEl = document.getElementById('score');
+  function updateScore(){ scoreEl.textContent = score; }
+
+  function makeStamp(ok){
+    const s = document.createElement('span');
+    s.className = 'stamp ' + (ok ? 'ok' : 'bad');
+    s.textContent = ok ? '✓ CORRECTO' : '✗ INCORRECTO';
+    return s;
+  }
+
+  // Multiple choice
+  document.querySelectorAll('.mc').forEach(block => {
+    const correct = parseInt(block.dataset.correct, 10);
+    const buttons = block.querySelectorAll('.opt');
+    let answered = false;
+    buttons.forEach((btn, idx) => {
+      btn.addEventListener('click', () => {
+        if (answered) return;
+        answered = true;
+        buttons.forEach(b => b.disabled = true);
+        if (idx === correct) {
+          btn.classList.add('correct');
+          btn.appendChild(makeStamp(true));
+          score++;
+        } else {
+          btn.classList.add('incorrect');
+          buttons[correct].classList.add('correct');
+          btn.appendChild(makeStamp(false));
+        }
+        updateScore();
+        const j = block.querySelector('.justif');
+        if (j) j.hidden = false;
+      });
+    });
+  });
+
+  // True / False
+  document.querySelectorAll('.tf').forEach(block => {
+    const correct = block.dataset.correct === 'true';
+    const buttons = block.querySelectorAll('.tf-btn');
+    let answered = false;
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (answered) return;
+        answered = true;
+        const val = btn.dataset.value === 'true';
+        buttons.forEach(b => b.disabled = true);
+        if (val === correct) {
+          btn.classList.add('correct');
+          btn.appendChild(makeStamp(true));
+          score++;
+        } else {
+          btn.classList.add('incorrect');
+          const rightBtn = [...buttons].find(b => (b.dataset.value === 'true') === correct);
+          rightBtn.classList.add('correct');
+          btn.appendChild(makeStamp(false));
+        }
+        updateScore();
+        const j = block.querySelector('.justif');
+        if (j) j.hidden = false;
+      });
+    });
+  });
+
+  // Reveal buttons (casos y transacciones)
+  document.querySelectorAll('.reveal-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = btn.nextElementSibling;
+      const isHidden = target.hidden;
+      target.hidden = !isHidden;
+      btn.textContent = isHidden ? 'Ocultar respuesta' : 'Revelar respuesta';
+    });
+  });
+</script>
+</body>
+</html>
